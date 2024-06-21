@@ -3,9 +3,14 @@
   "module": "src/index.ts",
   "type": "module",
   "devDependencies": {
+    "@biomejs/biome": "^1.8.2",
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.5.2"
+  },
+  "dependencies": {
+    "@sinclair/typebox": "^0.32.33",
+    "openapi-types": "^12.1.3"
   }
 }
