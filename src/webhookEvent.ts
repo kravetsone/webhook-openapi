@@ -11,7 +11,7 @@ export class WebhookEvent<
 	_ = {
 		method: "post" as Lowercase<HTTPMethods>,
 		body: null as TSchema | null,
-		response: null as TSchema | null,
+		response: {} as OpenAPIV3_1.ResponsesObject,
 	};
 
 	// method<Method extends HTTPMethods>(method: Method) {
@@ -35,7 +35,10 @@ export class WebhookEvent<
 		return this;
 	}
 
-	response<Schema extends TSchema>(schema: Schema): WebhookEvent<Body, Schema> {
+	response<Schema extends TSchema>(
+		schema: Schema,
+		options?: OpenAPIV3_1.ResponseObject,
+	): WebhookEvent<Body, Schema> {
 		this._.response = schema;
 		return this;
 	}

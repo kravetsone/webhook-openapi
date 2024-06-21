@@ -1,4 +1,4 @@
-import { type Static, type TSchema, Type } from "@sinclair/typebox";
+import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { WebhookEvent } from "./webhookEvent";
 
@@ -27,19 +27,10 @@ export class Webhook<
 			paths: {},
 		};
 	}
-	// event<Name extends string, Event extends WebhookEvent>(
-	// 	name: Name,
-	// 	event: (event: WebhookEvent) => Event,
-	// ): Webhook<
-	// 	Events & {
-	// 		[K in Name]: Event extends WebhookEvent<infer Body, infer Response>
-	// 			? { body: Body; response: Response }
-	// 			: never;
-	// 	}
-	// > {
 	event<Name extends string, Event extends WebhookEvent>(
 		name: Name,
 		event: (event: WebhookEvent) => Event,
+		params?: Omit<OpenAPIV3_1.PathItemObject, OpenAPIV3_1.HttpMethods>,
 	): Webhook<
 		Events & {
 			[K in Name]: Event extends WebhookEvent<infer Body, infer Response>
@@ -50,6 +41,7 @@ export class Webhook<
 		const webhookEvent = event(new WebhookEvent());
 
 		this.openapi.webhooks[name] = {
+			...params,
 			[webhookEvent._.method]: {
 				requestBody: {
 					content: {
@@ -60,9 +52,6 @@ export class Webhook<
 				},
 				responses: {
 					"200": {
-						headers: {
-							schema: Type.Literal("okk"),
-						},
 						description: "",
 						content: {
 							"application/json": { schema: webhookEvent._.response },
