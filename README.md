@@ -14,6 +14,9 @@ This library is aimed at helping to implement a Webhook server.
 # Usage
 
 ```ts
+import { Webhook } from "webhook-openapi";
+import { Type } from "@sinclair/typebox";
+
 const WEBHOOK_URL = "http://localhost:8943";
 
 const webhook = new Webhook()
@@ -32,7 +35,7 @@ const webhook = new Webhook()
                     })
                 ),
         {
-            description: "Ok thank you",
+            description: "Some description",
         }
     )
     .event("some2", (event) =>
