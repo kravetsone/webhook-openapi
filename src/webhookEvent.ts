@@ -40,6 +40,7 @@ export class WebhookEvent<
 		options?: OpenAPIV3_1.ResponseObject,
 	): WebhookEvent<Body, Schema> {
 		this._.response = schema;
+
 		return this;
 	}
 }

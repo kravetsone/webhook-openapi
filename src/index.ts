@@ -2,6 +2,9 @@ import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
 import { WebhookEvent } from "./webhookEvent";
 
+export * from "@sinclair/typebox";
+export * from "./webhookEvent";
+
 export class Webhook<
 	Events extends Record<
 		string,
