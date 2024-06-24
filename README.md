@@ -1,5 +1,13 @@
 # webhook-openapi
 
+<div align="center">
+
+[![npm](https://img.shields.io/npm/v/webhook-openapi?logo=npm&style=flat&labelColor=000&color=3b82f6)](https://www.npmjs.org/package/webhook-openapi)
+[![JSR](https://jsr.io/badges/webhook-openapi)](https://jsr.io/webhook-openapi)
+[![JSR Score](https://jsr.io/badges/webhook-openapi/score)](https://jsr.io/webhook-openapi)
+
+</div>
+
 This library is aimed at helping to implement a Webhook server.
 
 > [!WARNING]
