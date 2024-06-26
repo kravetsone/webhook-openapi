@@ -9,3 +9,13 @@ export type HTTPMethods =
 	| "OPTIONS"
 	| "HEAD"
 	| "TRACE";
+
+export namespace Hooks {
+	export type BeforeRequest = (data: Request) => any;
+	export type AfterResponse = (data: Response) => any;
+
+	export interface Store {
+		beforeRequest: BeforeRequest[];
+		afterResponse: AfterResponse[];
+	}
+}

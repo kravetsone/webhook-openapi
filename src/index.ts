@@ -1,5 +1,6 @@
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
+import type { Hooks } from "./types";
 import { WebhookEvent } from "./webhookEvent";
 
 export * from "@sinclair/typebox";
@@ -19,6 +20,11 @@ export class Webhook<
 		webhooks: NonNullable<OpenAPIV3_1.Document["webhooks"]>;
 	};
 
+	private hooks: Hooks.Store = {
+		beforeRequest: [],
+		afterResponse: [],
+	};
+
 	constructor() {
 		this.openapi = {
 			openapi: "3.1.0",
@@ -30,17 +36,26 @@ export class Webhook<
 			paths: {},
 		};
 	}
+
+	private async runMutationHooks<Name extends keyof Hooks.Store>(
+		name: Name,
+		args: Parameters<Hooks.Store[Name][0]>[0],
+	) {
+		let data = args;
+
+		for await (const hook of this.hooks[name]) {
+			// @ts-expect-error
+			data = await hook(args);
+		}
+
+		return data as ReturnType<Hooks.Store[Name][0]>;
+	}
+
 	event<Name extends string, Event extends WebhookEvent>(
 		name: Name,
 		event: (event: WebhookEvent) => Event,
 		params?: Omit<OpenAPIV3_1.PathItemObject, OpenAPIV3_1.HttpMethods>,
-	): Webhook<
-		Events & {
-			[K in Name]: Event extends WebhookEvent<infer Body, infer Response>
-				? { body: Body; response: Response }
-				: never;
-		}
-	> {
+	) {
 		const webhookEvent = event(new WebhookEvent());
 
 		this.openapi.webhooks[name] = {
@@ -64,7 +79,13 @@ export class Webhook<
 			} as OpenAPIV3_1.OperationObject,
 		};
 
-		return this as any;
+		return this as unknown as Webhook<
+			Events & {
+				[K in Name]: Event extends WebhookEvent<infer Body, infer Response>
+					? { body: Body; response: Response }
+					: never;
+			}
+		>;
 	}
 
 	async call<Event extends keyof Events>(
