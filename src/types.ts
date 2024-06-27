@@ -1,5 +1,7 @@
 // export type SoftString<T extends string> = T & (string & {});
 
+import type { Webhook } from "./index";
+
 export type HTTPMethods =
 	| "GET"
 	| "POST"
@@ -13,12 +15,16 @@ export type HTTPMethods =
 export namespace Hooks {
 	export type BeforeRequest = (data: {
 		request: Request;
-		data: unknown;
+		data: any;
+		event: string;
+		webhook: Webhook;
 	}) => any;
 	export type AfterResponse = (data: {
 		response: Response;
 		request: Request;
 		data: any;
+		event: string;
+		webhook: Webhook;
 	}) => any;
 
 	export interface Store {

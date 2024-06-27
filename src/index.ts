@@ -109,15 +109,31 @@ export class Webhook<
 		event: Event,
 		params: Static<Events[Event]["body"]>,
 	) {
-		const request = new Request(url);
+		const request = new Request(url, {
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(params),
+		});
 
-		this.runHooks("beforeRequest", { request, data: params });
+		this.runHooks("beforeRequest", {
+			request,
+			data: params,
+			event,
+			webhook: this,
+		});
 
 		const response = await fetch(request);
 
 		const data = (await response.json()) as Static<Events[Event]["response"]>;
 
-		this.runHooks("afterResponse", { response, request, data });
+		this.runHooks("afterResponse", {
+			response,
+			request,
+			data,
+			event,
+			webhook: this,
+		});
 
 		return data;
 	}

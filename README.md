@@ -61,3 +61,21 @@ console.log(webhook.openapi); // get OpenAPI document with `webhooks` object
 const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 //      ^? const response: { status: "ok" }
 ```
+
+### Hooks
+
+-   afterResponse
+
+```ts
+const webhook = new Webhook().onAfterResponse(
+    ({ response, data, request, event, webhook }) => {
+        console.log(response);
+        if (!response.ok)
+            setTimeout(
+                // @ts-expect-error
+                async () => webhook.call(request.url, event, data),
+                10 * 1000
+            );
+    }
+);
+```
