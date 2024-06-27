@@ -104,7 +104,7 @@ export class Webhook<
 		>;
 	}
 
-	async call<Event extends keyof Events>(
+	async call<Event extends keyof Events & string>(
 		url: string,
 		event: Event,
 		params: Static<Events[Event]["body"]>,
