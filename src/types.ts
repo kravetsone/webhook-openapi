@@ -11,8 +11,15 @@ export type HTTPMethods =
 	| "TRACE";
 
 export namespace Hooks {
-	export type BeforeRequest = (data: Request) => any;
-	export type AfterResponse = (data: Response) => any;
+	export type BeforeRequest = (data: {
+		request: Request;
+		data: unknown;
+	}) => any;
+	export type AfterResponse = (data: {
+		response: Response;
+		request: Request;
+		data: any;
+	}) => any;
 
 	export interface Store {
 		beforeRequest: BeforeRequest[];

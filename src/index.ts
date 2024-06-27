@@ -37,6 +37,22 @@ export class Webhook<
 		};
 	}
 
+	private async runHooks<Name extends keyof Hooks.Store>(
+		name: Name,
+		args: Parameters<Hooks.Store[Name][0]>[0],
+	) {
+		for (const hook of this.hooks[name]) {
+			// @ts-expect-error
+			hook(args);
+		}
+	}
+
+	onAfterResponse(hook: Hooks.AfterResponse) {
+		this.hooks.afterResponse.push(hook);
+
+		return this;
+	}
+
 	private async runMutationHooks<Name extends keyof Hooks.Store>(
 		name: Name,
 		args: Parameters<Hooks.Store[Name][0]>[0],
@@ -93,9 +109,15 @@ export class Webhook<
 		event: Event,
 		params: Static<Events[Event]["body"]>,
 	) {
-		const response = await fetch(url);
+		const request = new Request(url);
+
+		this.runHooks("beforeRequest", { request, data: params });
+
+		const response = await fetch(request);
 
 		const data = (await response.json()) as Static<Events[Event]["response"]>;
+
+		this.runHooks("afterResponse", { response, request, data });
 
 		return data;
 	}
