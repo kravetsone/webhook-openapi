@@ -22,6 +22,7 @@ export namespace Hooks {
 	export type AfterResponse = (data: {
 		response: Response;
 		request: Request;
+		body: any;
 		data: any;
 		event: string;
 		webhook: Webhook;

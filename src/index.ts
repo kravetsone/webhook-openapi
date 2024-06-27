@@ -110,6 +110,7 @@ export class Webhook<
 		params: Static<Events[Event]["body"]>,
 	) {
 		const request = new Request(url, {
+			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
@@ -130,6 +131,7 @@ export class Webhook<
 		this.runHooks("afterResponse", {
 			response,
 			request,
+			body: params,
 			data,
 			event,
 			webhook: this,
