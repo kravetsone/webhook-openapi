@@ -89,10 +89,12 @@ export class Webhook<
 							schema: webhookEvent._.body,
 						},
 					},
+					required: true,
+					description: webhookEvent._.body?.description,
 				},
 				responses: {
 					"200": {
-						description: "",
+						description: webhookEvent._.response?.description ?? "",
 						content: {
 							"application/json": { schema: webhookEvent._.response },
 						},

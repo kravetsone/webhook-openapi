@@ -11,7 +11,8 @@ export class WebhookEvent<
 	_ = {
 		method: "post" as Lowercase<HTTPMethods>,
 		body: null as TSchema | null,
-		response: {} as OpenAPIV3_1.ResponsesObject,
+		response: {} as TSchema | null,
+		//OpenAPIV3_1.ResponsesObject,
 	};
 
 	// method<Method extends HTTPMethods>(method: Method) {
