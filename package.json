@@ -17,7 +17,7 @@
         "swagger",
         "callbacks"
     ],
-    "version": "0.0.5",
+    "version": "0.0.6",
     "type": "module",
     "devDependencies": {
         "@biomejs/biome": "^1.8.2",

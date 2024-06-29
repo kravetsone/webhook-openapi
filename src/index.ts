@@ -1,5 +1,6 @@
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
+import { mapProperties } from "utils";
 import type { Hooks, RequestOptions } from "./types";
 import { WebhookEvent } from "./webhookEvent";
 
@@ -83,6 +84,9 @@ export class Webhook<
 		this.openapi.webhooks[name] = {
 			...params,
 			[webhookEvent._.method]: {
+				parameters: webhookEvent._.bodyHeaders
+					? mapProperties("header", webhookEvent._.bodyHeaders)
+					: undefined,
 				requestBody: {
 					content: {
 						"application/json": {

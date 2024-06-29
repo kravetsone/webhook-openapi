@@ -1,4 +1,4 @@
-import type { TSchema } from "@sinclair/typebox";
+import type { TObject, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { HTTPMethods } from "./types";
 
@@ -11,6 +11,7 @@ export class WebhookEvent<
 	_ = {
 		method: "post" as Lowercase<HTTPMethods>,
 		body: null as TSchema | null,
+		bodyHeaders: null as TObject | null,
 		response: {} as TSchema | null,
 		//OpenAPIV3_1.ResponsesObject,
 	};
@@ -20,7 +21,11 @@ export class WebhookEvent<
 
 	// 	return this;
 	// }
+	bodyHeaders<Schema extends TObject>(schema: Schema) {
+		this._.bodyHeaders = schema;
 
+		return this;
+	}
 	body<Schema extends TSchema>(schema: Schema): WebhookEvent<Schema>;
 	body<Schema extends TSchema>(
 		contentType: string,
