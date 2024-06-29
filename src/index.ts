@@ -1,6 +1,6 @@
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
-import type { Hooks } from "./types";
+import type { Hooks, RequestOptions } from "./types";
 import { WebhookEvent } from "./webhookEvent";
 
 export * from "@sinclair/typebox";
@@ -45,6 +45,12 @@ export class Webhook<
 			// @ts-expect-error
 			hook(args);
 		}
+	}
+
+	onBeforeRequest(hook: Hooks.BeforeRequest) {
+		this.hooks.beforeRequest.push(hook);
+
+		return this;
 	}
 
 	onAfterResponse(hook: Hooks.AfterResponse) {
@@ -108,29 +114,32 @@ export class Webhook<
 		url: string,
 		event: Event,
 		params: Static<Events[Event]["body"]>,
+		requestOptions?: RequestOptions,
 	) {
-		const request = new Request(url, {
+		const requestInit: RequestOptions = {
 			method: "POST",
-			headers: {
+			headers: new Headers({
 				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(params),
-		});
+			}),
+			...requestOptions,
+		};
 
-		this.runHooks("beforeRequest", {
-			request,
+		await this.runMutationHooks("beforeRequest", {
+			request: requestInit,
 			data: params,
 			event,
 			webhook: this,
 		});
+		// ! TODO: more thing about serialization and deserialization for general usage
+		if (!requestInit.body) requestInit.body = JSON.stringify(params);
 
-		const response = await fetch(request);
+		const response = await fetch(url, requestInit);
 
 		const data = (await response.json()) as Static<Events[Event]["response"]>;
 
 		this.runHooks("afterResponse", {
 			response,
-			request,
+			request: requestInit,
 			body: params,
 			data,
 			event,

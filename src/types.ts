@@ -12,16 +12,20 @@ export type HTTPMethods =
 	| "HEAD"
 	| "TRACE";
 
+export type RequestOptions = Omit<RequestInit, "headers"> & {
+	headers: Headers;
+};
+
 export namespace Hooks {
 	export type BeforeRequest = (data: {
-		request: Request;
+		request: RequestOptions;
 		data: any;
 		event: string;
 		webhook: Webhook;
 	}) => any;
 	export type AfterResponse = (data: {
 		response: Response;
-		request: Request;
+		request: RequestOptions;
 		body: any;
 		data: any;
 		event: string;
