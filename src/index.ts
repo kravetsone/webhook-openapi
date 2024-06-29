@@ -1,7 +1,7 @@
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
-import { mapProperties } from "utils";
 import type { Hooks, RequestOptions } from "./types";
+import { mapProperties } from "./utils";
 import { WebhookEvent } from "./webhookEvent";
 
 export * from "@sinclair/typebox";
