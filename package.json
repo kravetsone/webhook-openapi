@@ -16,10 +16,17 @@
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.2",
 		"@types/bun": "latest",
-		"pkgroll": "^2.1.1"
+		"drizzle-orm": "^0.32.2",
+		"pkgroll": "^2.1.1",
+		"typescript": "^5.5.2"
 	},
 	"peerDependencies": {
-		"typescript": "^5.5.2"
+		"drizzle-orm": "^0.30.0"
+	},
+	"peerDependenciesMeta": {
+		"drizzle-orm": {
+			"optional": true
+		}
 	},
 	"dependencies": {
 		"@sinclair/typebox": "^0.32.15",
