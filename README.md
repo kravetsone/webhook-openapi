@@ -65,6 +65,20 @@ const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 
 ### Hooks
 
+- sendError
+
+```ts
+const webhook = new Webhook().onSendError(
+    ({ data, request, event, webhook }) => {
+            setTimeout(
+                // @ts-expect-error
+                async () => webhook.call(request.url, event, data),
+                10 * 1000
+            );
+    }
+);
+```
+
 -   afterResponse
 
 ```ts
