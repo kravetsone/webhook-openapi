@@ -29,6 +29,7 @@ export function store(
 				});
 
 			custom.requestId = id;
+			custom.responseStart = performance.now();
 		})
 		.onAfterResponse(async ({ custom, response, data }) => {
 			if ("requestId" in custom) {
@@ -37,6 +38,10 @@ export function store(
 					headers: response.headers.toJSON(),
 					data,
 					status: response.status,
+					responseTime:
+						typeof custom.responseStart === "number"
+							? performance.now() - custom.responseStart
+							: 0,
 				});
 			}
 		});
@@ -189,6 +194,21 @@ export type PGResponseTable = PgTableWithColumns<{
 			data: any;
 			driverParam: any;
 			hasDefault: false;
+			name: any;
+			isPrimaryKey: any;
+			isAutoincrement: any;
+			hasRuntimeDefault: any;
+			generated: any;
+		}>;
+		responseTime?: PgColumn<{
+			dataType: any;
+			notNull: boolean;
+			enumValues: any;
+			tableName: any;
+			columnType: any;
+			data: any;
+			driverParam: any;
+			hasDefault: boolean;
 			name: any;
 			isPrimaryKey: any;
 			isAutoincrement: any;

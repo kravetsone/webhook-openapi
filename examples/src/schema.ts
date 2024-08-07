@@ -1,4 +1,11 @@
-import { integer, jsonb, pgTable, serial, text } from "drizzle-orm/pg-core";
+import {
+	integer,
+	jsonb,
+	pgTable,
+	real,
+	serial,
+	text,
+} from "drizzle-orm/pg-core";
 
 export const requestTable = pgTable("requests", {
 	id: serial("id").primaryKey(),
@@ -15,6 +22,7 @@ export const responseTable = pgTable("responses", {
 	requestId: integer("request_id")
 		.notNull()
 		.references(() => requestTable.id),
+	responseTime: real("response_time"),
 });
 
 type A = (typeof requestTable)["_"]["columns"]["headers"];
