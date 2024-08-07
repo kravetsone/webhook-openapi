@@ -24,6 +24,7 @@ export class Webhook<
 	private hooks: Hooks.Store = {
 		beforeRequest: [],
 		afterResponse: [],
+		sendError: [],
 	};
 
 	constructor() {
@@ -48,18 +49,6 @@ export class Webhook<
 		}
 	}
 
-	onBeforeRequest(hook: Hooks.BeforeRequest) {
-		this.hooks.beforeRequest.push(hook);
-
-		return this;
-	}
-
-	onAfterResponse(hook: Hooks.AfterResponse) {
-		this.hooks.afterResponse.push(hook);
-
-		return this;
-	}
-
 	private async runMutationHooks<Name extends keyof Hooks.Store>(
 		name: Name,
 		args: Parameters<Hooks.Store[Name][0]>[0],
@@ -72,6 +61,24 @@ export class Webhook<
 		}
 
 		return data as ReturnType<Hooks.Store[Name][0]>;
+	}
+
+	onBeforeRequest(hook: Hooks.BeforeRequest) {
+		this.hooks.beforeRequest.push(hook);
+
+		return this;
+	}
+
+	onAfterResponse(hook: Hooks.AfterResponse) {
+		this.hooks.afterResponse.push(hook);
+
+		return this;
+	}
+
+	onSendError(hook: Hooks.SendError) {
+		this.hooks.sendError.push(hook);
+
+		return this;
 	}
 
 	event<Name extends string, Event extends WebhookEvent>(
@@ -138,19 +145,29 @@ export class Webhook<
 		});
 		// ! TODO: more thing about serialization and deserialization for general usage
 		if (!requestInit.body) requestInit.body = JSON.stringify(params);
+		try {
+			const response = await fetch(url, requestInit);
 
-		const response = await fetch(url, requestInit);
+			// const data = (await response.json()) as Static<Events[Event]["response"]>;
 
-		// const data = (await response.json()) as Static<Events[Event]["response"]>;
-
-		this.runHooks("afterResponse", {
-			response,
-			request: requestInit,
-			body: params,
-			data: null,
-			event,
-			webhook: this,
-		});
+			this.runHooks("afterResponse", {
+				response,
+				request: requestInit,
+				body: params,
+				data: null,
+				event,
+				webhook: this,
+			});
+		} catch (error) {
+			if (error instanceof Error)
+				await this.runHooks("sendError", {
+					request: requestInit,
+					data: params,
+					event,
+					webhook: this,
+					error,
+				});
+		}
 
 		return null;
 	}

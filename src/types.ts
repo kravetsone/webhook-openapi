@@ -31,9 +31,16 @@ export namespace Hooks {
 		event: string;
 		webhook: Webhook;
 	}) => any;
-
+	export type SendError = (data: {
+		request: RequestOptions;
+		data: any;
+		event: string;
+		webhook: Webhook;
+		error: Error;
+	}) => any;
 	export interface Store {
 		beforeRequest: BeforeRequest[];
 		afterResponse: AfterResponse[];
+		sendError: SendError[];
 	}
 }
