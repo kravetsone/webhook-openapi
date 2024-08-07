@@ -1,0 +1,119 @@
+import type {
+	PgColumn,
+	PgDatabase,
+	PgTableWithColumns,
+} from "drizzle-orm/pg-core";
+import { Webhook } from "../../index";
+
+// export interface StoreOptions {
+// 	db: PgDatabase<any, any, any>;
+// 	requestTable: PGRequestTable;
+// }
+
+export function store(
+	db: PgDatabase<any, any, any>,
+	requestTable: PGRequestTable,
+) {
+	return new Webhook().onBeforeRequest(
+		async ({ request, url, custom, data }) => {
+			const [{ id }] = await db
+				.insert(requestTable)
+				.values({
+					headers: request.headers.toJSON(),
+					data,
+					url,
+				})
+				.returning({
+					id: requestTable.id,
+				});
+
+			custom.requestId = id;
+		},
+	);
+}
+
+export type PGRequestTable = PgTableWithColumns<{
+	dialect: "pg";
+	columns: {
+		id: PgColumn<
+			{
+				name: any;
+				tableName: any;
+				dataType: any;
+				columnType: any;
+				data: any;
+				driverParam: any;
+				notNull: true;
+				hasDefault: boolean; // must be boolean instead of any to allow default values
+				enumValues: any;
+				baseColumn: any;
+				isPrimaryKey: any;
+				isAutoincrement: any;
+				hasRuntimeDefault: any;
+				generated: any;
+			},
+			object
+		>;
+		data: PgColumn<
+			{
+				name: any;
+				tableName: any;
+				dataType: "json";
+				columnType: "PgJsonb";
+				data: unknown;
+				driverParam: unknown;
+				notNull: boolean;
+				hasDefault: boolean;
+				enumValues: undefined;
+				baseColumn: never;
+				isPrimaryKey: any;
+				isAutoincrement: any;
+				hasRuntimeDefault: any;
+				generated: any;
+			},
+			{},
+			{}
+		>;
+		url: PgColumn<
+			{
+				dataType: any;
+				notNull: boolean;
+				enumValues: any;
+				tableName: any;
+				columnType: any;
+				data: string;
+				driverParam: any;
+				hasDefault: false;
+				name: any;
+				isPrimaryKey: any;
+				isAutoincrement: any;
+				hasRuntimeDefault: any;
+				generated: any;
+			},
+			object
+		>;
+		headers: PgColumn<
+			{
+				name: any;
+				tableName: any;
+				dataType: "json";
+				columnType: "PgJsonb";
+				data: Record<string, string>;
+				driverParam: unknown;
+				notNull: boolean;
+				hasDefault: boolean;
+				enumValues: undefined;
+				baseColumn: never;
+				isPrimaryKey: any;
+				isAutoincrement: any;
+				hasRuntimeDefault: any;
+				generated: any;
+			},
+			{},
+			{}
+		>;
+	};
+
+	schema: any;
+	name: any;
+}>;

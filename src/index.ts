@@ -139,6 +139,7 @@ export class Webhook<
 		params: Static<Events[Event]["body"]>,
 		requestOptions?: RequestOptions,
 	) {
+		const custom = {};
 		const requestInit: RequestOptions = {
 			method: "POST",
 			headers: new Headers({
@@ -151,6 +152,8 @@ export class Webhook<
 			request: requestInit,
 			data: params,
 			event,
+			url,
+			custom,
 			webhook: this,
 		});
 		// ! TODO: more thing about serialization and deserialization for general usage
@@ -166,6 +169,7 @@ export class Webhook<
 				body: params,
 				data: null,
 				event,
+				custom,
 				webhook: this,
 			});
 		} catch (error) {

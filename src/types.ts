@@ -20,8 +20,10 @@ export namespace Hooks {
 	export type BeforeRequest = (data: {
 		request: RequestOptions;
 		data: any;
+		url: string;
 		event: string;
 		webhook: Webhook;
+		custom: Record<string, any>;
 	}) => any;
 	export type AfterResponse = (data: {
 		response: Response;
@@ -30,6 +32,7 @@ export namespace Hooks {
 		data: any;
 		event: string;
 		webhook: Webhook;
+		custom: Record<string, any>;
 	}) => any;
 	export type SendError = (data: {
 		request: RequestOptions;
