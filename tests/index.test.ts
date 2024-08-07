@@ -72,4 +72,24 @@ describe("webhook", () => {
 
 		expect(isErr).toBe(true);
 	});
+	test("should extend from another Webhook instance", async () => {
+		let isErr = false;
+
+		const webhook = new Webhook()
+			.extend(
+				new Webhook().onSendError(({ error }) => {
+					console.log(error);
+					isErr = true;
+				}),
+			)
+			.event("test", (event) =>
+				event.body(Type.Object({ body: Type.String() })),
+			);
+
+		await webhook.call("http://localhost:8878", "test", { body: "test" });
+
+		expect(isErr).toBe(true);
+		// @ts-expect-error
+		expect(webhook.hooks.sendError.length).toBe(1);
+	});
 });

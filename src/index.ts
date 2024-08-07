@@ -39,6 +39,16 @@ export class Webhook<
 		};
 	}
 
+	extend<WebhookPlugin extends Webhook<any>>(
+		webhook: WebhookPlugin,
+	): Webhook<Events & (WebhookPlugin extends Webhook<infer E> ? E : never)> {
+		this.hooks.afterResponse.push(...webhook.hooks.afterResponse);
+		this.hooks.beforeRequest.push(...webhook.hooks.beforeRequest);
+		this.hooks.sendError.push(...webhook.hooks.sendError);
+
+		return this;
+	}
+
 	private async runHooks<Name extends keyof Hooks.Store>(
 		name: Name,
 		args: Parameters<Hooks.Store[Name][0]>[0],
