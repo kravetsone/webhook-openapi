@@ -63,18 +63,36 @@ const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 //      ^? const response: { status: "ok" }
 ```
 
+### Plugins
+
+You can write your own plugin:
+
+```ts
+const retriesPlugin = new Webhook().onSendError(
+    ({ data, request, event, webhook }) => {
+        setTimeout(
+            // @ts-expect-error
+            async () => webhook.call(request.url, event, data),
+            10 * 1000
+        );
+    }
+);
+
+const webhook = new Webhook().extend(retriesPlugin);
+```
+
 ### Hooks
 
-- sendError
+-   sendError
 
 ```ts
 const webhook = new Webhook().onSendError(
     ({ data, request, event, webhook }) => {
-            setTimeout(
-                // @ts-expect-error
-                async () => webhook.call(request.url, event, data),
-                10 * 1000
-            );
+        setTimeout(
+            // @ts-expect-error
+            async () => webhook.call(request.url, event, data),
+            10 * 1000
+        );
     }
 );
 ```
