@@ -36,6 +36,7 @@ export class WebhookEvent<
 		schema?: Schema,
 	): WebhookEvent<Schema, Response> {
 		this._.body =
+			// biome-ignore lint/style/noNonNullAssertion: <explanation>
 			typeof contentTypeOrSchema === "object" ? contentTypeOrSchema : schema!;
 
 		return this;

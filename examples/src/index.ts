@@ -1,11 +1,12 @@
 import { Type, Webhook } from "../../src";
 import { store } from "../../src/plugins/store-drizzle";
-import { db, requestTable } from "./db";
+import { db, eq, requestTable, responseTable } from "./db";
 
 const responseOK = new Response("ok", {
 	headers: {
 		"content-type": "text/plain",
 	},
+	status: 500,
 });
 
 using server = Bun.serve({
@@ -14,11 +15,14 @@ using server = Bun.serve({
 });
 
 const webhook = new Webhook()
-	.extend(store(db, requestTable))
+	.extend(store(db, requestTable, responseTable))
 	.event("test", (event) => event.body(Type.Object({ body: Type.String() })));
 
 await webhook.call(server.url.href, "test", { body: "test" });
 
-const requests = await db.select().from(requestTable);
+const requests = await db
+	.select()
+	.from(requestTable)
+	.leftJoin(responseTable, eq(requestTable.id, responseTable.requestId));
 
 console.log(requests);
