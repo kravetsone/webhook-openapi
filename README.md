@@ -70,8 +70,10 @@ const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 This simple plugin is just retries when request failed (sendError or non-ok response). First argument is timeout ms (default to `30 * 1000`).
 
 ```ts
+import { retryOnTimers } from "webhook-openapi/plugins/timers-retries";
+
 const webhook = new Webhook()
-    .extend(retriesOnTimers(60 * 1000))
+    .extend(retryOnTimers(60 * 1000))
     .event("test", (event) => event.body(Type.Object({ body: Type.String() })));
 ```
 
@@ -83,6 +85,8 @@ This plugin writes requests and responses to the database using drizzle
 > It is important to remember that when used together with the retries plugin, only the Response with the same RequestId is duplicated
 
 ```ts
+import { store } from "webhook-openapi/plugins/store-drizzle";
+
 export const requestTable = pgTable("requests", {
     id: serial("id").primaryKey(),
     data: jsonb("data"),
