@@ -1,6 +1,6 @@
 import { Type, Webhook } from "../../src";
 import { store } from "../../src/plugins/store-drizzle";
-import { retryOnTimers } from "../../src/plugins/timers-retries";
+import { retriesOnTimers } from "../../src/plugins/timers-retries";
 import { db, eq, requestTable, responseTable } from "./db";
 
 const responseOK = new Response("ok", {
@@ -29,7 +29,7 @@ const server = Bun.serve({
 });
 
 const webhook = new Webhook()
-	.extend(retryOnTimers(8 * 1000))
+	.extend(retriesOnTimers(8 * 1000))
 	.extend(store(db, requestTable, responseTable))
 	.onAfterResponse(({ response }) => {
 		console.log(response);

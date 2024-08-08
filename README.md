@@ -70,10 +70,10 @@ const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 This simple plugin is just retries when request failed (sendError or non-ok response). First argument is timeout ms (default to `30 * 1000`).
 
 ```ts
-import { retryOnTimers } from "webhook-openapi/plugins/timers-retries";
+import { retriesOnTimers } from "webhook-openapi/plugins/timers-retries";
 
 const webhook = new Webhook()
-    .extend(retryOnTimers(60 * 1000))
+    .extend(retriesOnTimers(60 * 1000))
     .event("test", (event) => event.body(Type.Object({ body: Type.String() })));
 ```
 
@@ -186,6 +186,8 @@ const webhook = new Webhook().onBeforeRequest(({ request, data }) => {
 ### mimeType
 
 it so boring to talk about it... Please read this test
+
+by default `application/json` and `text/plain` mimeTypes are handled
 
 ```ts
 import { unpack, pack } from "msgpackr";

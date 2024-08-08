@@ -2,7 +2,7 @@ import { Webhook } from "../../index";
 
 // TODO: add bullmq based retries
 
-export function retryOnTimers(ms: number = 30 * 1000) {
+export function retriesOnTimers(ms: number = 30 * 1000) {
 	return new Webhook()
 		.onSendError(({ webhook, request, url, data, event }) => {
 			setTimeout(
