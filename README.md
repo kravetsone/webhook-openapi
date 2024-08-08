@@ -87,6 +87,16 @@ This plugin writes requests and responses to the database using drizzle
 ```ts
 import { store } from "webhook-openapi/plugins/store-drizzle";
 
+export type HTTPMethods =
+    | "GET"
+    | "POST"
+    | "PUT"
+    | "PATCH"
+    | "DELETE"
+    | "OPTIONS"
+    | "HEAD"
+    | "TRACE";
+
 export const requestTable = pgTable("requests", {
     id: serial("id").primaryKey(),
     data: jsonb("data"),
