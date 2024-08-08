@@ -65,6 +65,53 @@ const response = await webhook.call(WEBHOOK_URL, "some", { some: "string" });
 
 ### Plugins
 
+### Retries on timers
+
+This simple plugin is just retries when request failed (sendError or non-ok response). First argument is timeout ms (default to `30 * 1000`).
+
+```ts
+const webhook = new Webhook()
+    .extend(retriesOnTimers(60 * 1000))
+    .event("test", (event) => event.body(Type.Object({ body: Type.String() })));
+```
+
+### Store Drizzle
+
+This plugin writes requests and responses to the database using drizzle
+
+> [!WARNING]
+> It is important to remember that when used together with the retries plugin, only the Response with the same RequestId is duplicated
+
+```ts
+export const requestTable = pgTable("requests", {
+    id: serial("id").primaryKey(),
+    data: jsonb("data"),
+    method: text("method").$type<HTTPMethods>(),
+    headers: jsonb("headers").$type<Record<string, string>>(),
+    url: text("url"),
+});
+
+export const responseTable = pgTable("responses", {
+    id: serial("id").primaryKey(),
+    data: jsonb("data"),
+    headers: jsonb("headers").$type<Record<string, string>>(),
+    status: integer("status"),
+    requestId: integer("request_id")
+        .notNull()
+        .references(() => requestTable.id),
+    responseTime: real("response_time"),
+});
+
+const client = postgres(process.env.DATABASE_URL as string);
+const db = drizzle(client);
+
+const webhook = new Webhook()
+    .extend(store(db, requestTable, responseTable))
+    .event("test", (event) => event.body(Type.Object({ body: Type.String() })));
+```
+
+### You own plugin
+
 You can write your own plugin:
 
 ```ts
