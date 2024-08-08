@@ -4,6 +4,7 @@ import type {
 	PgTableWithColumns,
 } from "drizzle-orm/pg-core";
 import { Webhook } from "../../index";
+import type { HTTPMethods } from "../../types";
 
 // export interface StoreOptions {
 // 	db: PgDatabase<any, any, any>;
@@ -17,18 +18,22 @@ export function store(
 ) {
 	return new Webhook()
 		.onBeforeRequest(async ({ request, url, custom, data }) => {
-			const [{ id }] = await db
-				.insert(requestTable)
-				.values({
-					headers: request.headers.toJSON(),
-					data,
-					url,
-				})
-				.returning({
-					id: requestTable.id,
-				});
+			if (!("requestId" in custom)) {
+				const [{ id }] = await db
+					.insert(requestTable)
+					.values({
+						headers: request.headers.toJSON(),
+						data,
+						url,
+						method: request.method?.toUpperCase() as HTTPMethods,
+					})
+					.returning({
+						id: requestTable.id,
+					});
 
-			custom.requestId = id;
+				custom.requestId = id;
+			}
+
 			custom.responseStart = performance.now();
 		})
 		.onAfterResponse(async ({ custom, response, data }) => {
@@ -89,6 +94,21 @@ export type PGRequestTable = PgTableWithColumns<{
 			tableName: any;
 			columnType: any;
 			data: string;
+			driverParam: any;
+			hasDefault: false;
+			name: any;
+			isPrimaryKey: any;
+			isAutoincrement: any;
+			hasRuntimeDefault: any;
+			generated: any;
+		}>;
+		method: PgColumn<{
+			dataType: any;
+			notNull: boolean;
+			enumValues: any;
+			tableName: any;
+			columnType: any;
+			data: HTTPMethods;
 			driverParam: any;
 			hasDefault: false;
 			name: any;

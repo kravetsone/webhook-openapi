@@ -137,14 +137,15 @@ export class Webhook<
 		url: string,
 		event: Event,
 		params: Static<Events[Event]["body"]>,
-		requestOptions?: RequestOptions,
+		requestOptions?: Partial<RequestOptions> & { custom?: Record<string, any> },
 	) {
-		const custom = {};
+		const custom = requestOptions?.custom ?? {};
 		const requestInit: RequestOptions = {
 			method: "POST",
 			headers: new Headers({
 				"Content-Type": "application/json",
 			}),
+
 			...requestOptions,
 		};
 
@@ -156,16 +157,18 @@ export class Webhook<
 			custom,
 			webhook: this,
 		});
+
 		// ! TODO: more thing about serialization and deserialization for general usage
 		if (!requestInit.body) requestInit.body = JSON.stringify(params);
+
 		try {
 			const response = await fetch(url, requestInit);
-
 			// const data = (await response.json()) as Static<Events[Event]["response"]>;
 
 			this.runHooks("afterResponse", {
 				response,
 				request: requestInit,
+				url,
 				body: params,
 				data: null,
 				event,
@@ -177,6 +180,7 @@ export class Webhook<
 				await this.runHooks("sendError", {
 					request: requestInit,
 					data: params,
+					url,
 					event,
 					webhook: this,
 					error,

@@ -6,10 +6,12 @@ import {
 	serial,
 	text,
 } from "drizzle-orm/pg-core";
+import type { HTTPMethods } from "../../src/types";
 
 export const requestTable = pgTable("requests", {
 	id: serial("id").primaryKey(),
 	data: jsonb("data"),
+	method: text("method").$type<HTTPMethods>(),
 	headers: jsonb("headers").$type<Record<string, string>>(),
 	url: text("url"),
 });

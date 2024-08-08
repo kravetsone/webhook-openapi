@@ -28,6 +28,7 @@ export namespace Hooks {
 	export type AfterResponse = (data: {
 		response: Response;
 		request: RequestOptions;
+		url: string;
 		body: any;
 		data: any;
 		event: string;
@@ -37,6 +38,7 @@ export namespace Hooks {
 	export type SendError = (data: {
 		request: RequestOptions;
 		data: any;
+		url: string;
 		event: string;
 		webhook: Webhook;
 		error: Error;
