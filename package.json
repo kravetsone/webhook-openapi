@@ -6,12 +6,23 @@
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
+			"import": "./dist/index.js",
+			"require": "./dist/index.cjs"
+		},
+		"./plugins/store-drizzle": {
+			"types": "./dist/plugins/store-drizzle/index.d.ts",
+			"import": "./dist/plugins/store-drizzle/index.js",
+			"require": "./dist/plugins/store-drizzle/index.cjs"
+		},
+		"./plugins/timers-retries": {
+			"types": "./dist/plugins/timers-retries/index.d.ts",
+			"import": "./dist/plugins/timers-retries/index.js",
+			"require": "./dist/plugins/timers-retries/index.cjs"
 		}
 	},
 	"description": "Helps you create you own webhook server",
 	"keywords": ["webhook", "webhook-server", "openapi", "swagger", "callbacks"],
-	"version": "0.0.77",
+	"version": "0.1.0",
 	"type": "module",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.2",
