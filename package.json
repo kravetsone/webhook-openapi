@@ -28,6 +28,7 @@
 		"@biomejs/biome": "^1.8.3",
 		"@types/bun": "latest",
 		"drizzle-orm": "^0.32.2",
+		"msgpackr": "^1.11.0",
 		"pkgroll": "^2.4.2",
 		"typescript": "^5.5.4"
 	},

@@ -49,3 +49,13 @@ export namespace Hooks {
 		sendError: SendError[];
 	}
 }
+
+type MaybePromise<T> = Promise<T> | T;
+
+export type MimeTypeHelpers = Record<
+	string,
+	{
+		serialization: (data: any) => MaybePromise<BodyInit>;
+		deserialization: (response: Response) => MaybePromise<any>;
+	}
+>;

@@ -1,4 +1,4 @@
-import type { TObject } from "@sinclair/typebox";
+import type { TObject, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3 } from "openapi-types";
 
 export function mapProperties(
@@ -15,4 +15,17 @@ export function mapProperties(
 			required: schema.required?.includes(key) ?? false,
 		};
 	});
+}
+
+export function mapTypeContents(
+	mimeTypes: string[],
+	schema?: TSchema | undefined,
+) {
+	const responses: Record<string, OpenAPIV3.MediaTypeObject> = {};
+
+	for (const type of mimeTypes) {
+		responses[type] = { schema };
+	}
+
+	return responses;
 }

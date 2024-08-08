@@ -182,3 +182,41 @@ const webhook = new Webhook().onBeforeRequest(({ request, data }) => {
     request.body = JSON.stringify(data);
 });
 ```
+
+### mimeType
+
+it so boring to talk about it... Please read this test
+
+```ts
+import { unpack, pack } from "msgpackr";
+
+let answer = {};
+const shouldBe = { some: { values: true } };
+const mimeType = "application/x-msgpack";
+
+using server = Bun.serve({
+    port: 9888,
+    fetch: () =>
+        new Response(pack(shouldBe), {
+            headers: {
+                "content-type": mimeType,
+            },
+        }),
+});
+
+const webhook = new Webhook()
+    .mimeType(mimeType, {
+        serialization: (data) => pack(data),
+        deserialization: async (response) =>
+            unpack(Buffer.from(await response.arrayBuffer())),
+    })
+    .event("test", (event) => event.body(Type.Object({ body: Type.String() })))
+    .onAfterResponse(({ response, data }) => {
+        console.log(data, response);
+        answer = data;
+    });
+
+await webhook.call(server.url.href, "test", { body: "test" });
+
+expect(answer).toEqual(shouldBe);
+```

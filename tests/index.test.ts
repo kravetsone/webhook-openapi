@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { pack, unpack } from "msgpackr";
 import { Type, Webhook } from "../src/index";
 
 const responseOK = new Response("ok", {
@@ -10,6 +11,12 @@ const responseBad = new Response("Something went wrong", {
 	status: 500,
 	headers: {
 		"content-type": "text/plain",
+	},
+});
+
+const responseJSON = Response.json({
+	some: {
+		values: true,
 	},
 });
 
@@ -91,5 +98,70 @@ describe("webhook", () => {
 		expect(isErr).toBe(true);
 		// @ts-expect-error
 		expect(webhook.hooks.sendError.length).toBe(1);
+	});
+	test("should work with json default mimeType", async () => {
+		let answer = {};
+
+		using server = Bun.serve({
+			port: 9888,
+			fetch: () => responseJSON,
+		});
+
+		const webhook = new Webhook()
+
+			.event("test", (event) =>
+				event.body(Type.Object({ body: Type.String() })),
+			)
+			.onAfterResponse(({ response, data }) => {
+				console.log(data);
+				answer = data;
+			});
+
+		await webhook.call(server.url.href, "test", { body: "test" });
+
+		expect(answer).toEqual({
+			some: {
+				values: true,
+			},
+		});
+	});
+	test("should work with json default mimeType", async () => {
+		let answer = {};
+		const shouldBe = { some: { values: true } };
+		const mimeType = "application/x-msgpack";
+
+		using server = Bun.serve({
+			port: 9888,
+			fetch: () =>
+				new Response(pack(shouldBe), {
+					headers: {
+						"content-type": mimeType,
+					},
+				}),
+		});
+
+		const webhook = new Webhook()
+			.mimeType(mimeType, {
+				serialization: (data) => pack(data),
+				deserialization: async (response) =>
+					unpack(Buffer.from(await response.arrayBuffer())),
+			})
+			.event("test", (event) =>
+				event.body(Type.Object({ body: Type.String() })),
+			)
+			.onAfterResponse(({ response, data }) => {
+				console.log(data, response);
+				answer = data;
+			});
+
+		await webhook.call(server.url.href, "test", { body: "test" });
+
+		expect(answer).toEqual(shouldBe);
+		expect(
+			// @ts-expect-error
+			webhook.openapi.webhooks.test.post.requestBody.content[
+				"application/x-msgpack"
+			],
+		).not.toBeUndefined();
 	});
 });

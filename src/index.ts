@@ -1,7 +1,7 @@
 import type { Static, TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
-import type { Hooks, RequestOptions } from "./types";
-import { mapProperties } from "./utils";
+import type { Hooks, MimeTypeHelpers, RequestOptions } from "./types";
+import { mapProperties, mapTypeContents } from "./utils";
 import { WebhookEvent } from "./webhookEvent";
 
 export * from "@sinclair/typebox";
@@ -21,6 +21,17 @@ export class Webhook<
 		webhooks: NonNullable<OpenAPIV3_1.Document["webhooks"]>;
 	};
 
+	private mimeTypes: MimeTypeHelpers = {
+		"application/json": {
+			serialization: JSON.stringify,
+			deserialization: (response) => response.json(),
+		},
+		"text/plain": {
+			serialization: (data) => data,
+			deserialization: (response) => response.text(),
+		},
+	};
+
 	private hooks: Hooks.Store = {
 		beforeRequest: [],
 		afterResponse: [],
@@ -31,7 +42,7 @@ export class Webhook<
 		this.openapi = {
 			openapi: "3.1.0",
 			info: {
-				title: "ok",
+				title: "Webhook-openapi",
 				version: "0.0.1",
 			},
 			webhooks: {},
@@ -91,6 +102,12 @@ export class Webhook<
 		return this;
 	}
 
+	mimeType(mimeType: string, options: MimeTypeHelpers[string]) {
+		this.mimeTypes[mimeType] = options;
+
+		return this;
+	}
+
 	event<Name extends string, Event extends WebhookEvent>(
 		name: Name,
 		event: (event: WebhookEvent) => Event,
@@ -105,20 +122,20 @@ export class Webhook<
 					? mapProperties("header", webhookEvent._.bodyHeaders)
 					: undefined,
 				requestBody: {
-					content: {
-						"application/json": {
-							schema: webhookEvent._.body,
-						},
-					},
+					content: mapTypeContents(
+						Object.keys(this.mimeTypes),
+						webhookEvent._.body ?? undefined,
+					),
 					required: true,
 					description: webhookEvent._.body?.description,
 				},
 				responses: {
 					"200": {
 						description: webhookEvent._.response?.description ?? "",
-						content: {
-							"application/json": { schema: webhookEvent._.response },
-						},
+						content: mapTypeContents(
+							Object.keys(this.mimeTypes),
+							webhookEvent._.response ?? undefined,
+						),
 					},
 				},
 			} as OpenAPIV3_1.OperationObject,
@@ -137,7 +154,10 @@ export class Webhook<
 		url: string,
 		event: Event,
 		params: Static<Events[Event]["body"]>,
-		requestOptions?: Partial<RequestOptions> & { custom?: Record<string, any> },
+		requestOptions?: Partial<RequestOptions> & {
+			custom?: Record<string, any>;
+			mimeType?: string;
+		},
 	) {
 		const custom = requestOptions?.custom ?? {};
 		const requestInit: RequestOptions = {
@@ -159,18 +179,32 @@ export class Webhook<
 		});
 
 		// ! TODO: more thing about serialization and deserialization for general usage
-		if (!requestInit.body) requestInit.body = JSON.stringify(params);
+		if (!requestInit.body)
+			requestInit.body =
+				await this.mimeTypes[
+					requestOptions?.mimeType ?? "application/json"
+				].serialization(params);
 
 		try {
 			const response = await fetch(url, requestInit);
-			// const data = (await response.json()) as Static<Events[Event]["response"]>;
+			const mimeType = response.headers
+				.get("content-type")
+				?.split(";")[0]
+				.trim();
+			let data: BodyInit | undefined;
+
+			if (mimeType)
+				data =
+					await this.mimeTypes[mimeType ?? "application/text"]?.deserialization(
+						response,
+					); // as Static<Events[Event]["response"]>;
 
 			this.runHooks("afterResponse", {
 				response,
 				request: requestInit,
 				url,
 				body: params,
-				data: null,
+				data,
 				event,
 				custom,
 				webhook: this,
