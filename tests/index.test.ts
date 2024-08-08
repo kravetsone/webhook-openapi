@@ -164,4 +164,22 @@ describe("webhook", () => {
 			],
 		).not.toBeUndefined();
 	});
+	test("handle required prop", async () => {
+		const webhook = new Webhook()
+			.event("test", (event) =>
+				event.body(Type.Object({ body: Type.String() })),
+			)
+			.event("test-optional", (event) =>
+				event.body(Type.Optional(Object({ body: Type.String() }))),
+			);
+
+		expect(
+			// @ts-expect-error
+			webhook.openapi.webhooks.test.post.requestBody.required,
+		).toBe(true);
+		expect(
+			// @ts-expect-error
+			webhook.openapi.webhooks["test-optional"].post.requestBody.required,
+		).toBe(false);
+	});
 });

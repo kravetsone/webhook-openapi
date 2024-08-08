@@ -1,4 +1,4 @@
-import type { Static, TSchema } from "@sinclair/typebox";
+import { OptionalKind, type Static, type TSchema } from "@sinclair/typebox";
 import type { OpenAPIV3_1 } from "openapi-types";
 import type { Hooks, MimeTypeHelpers, RequestOptions } from "./types";
 import { mapProperties, mapTypeContents } from "./utils";
@@ -126,7 +126,7 @@ export class Webhook<
 						Object.keys(this.mimeTypes),
 						webhookEvent._.body ?? undefined,
 					),
-					required: true,
+					required: !(OptionalKind in (webhookEvent?._?.body ?? {})),
 					description: webhookEvent._.body?.description,
 				},
 				responses: {
@@ -163,7 +163,7 @@ export class Webhook<
 		const requestInit: RequestOptions = {
 			method: "POST",
 			headers: new Headers({
-				"Content-Type": "application/json",
+				"Content-Type": requestOptions?.mimeType ?? "application/json",
 			}),
 
 			...requestOptions,
