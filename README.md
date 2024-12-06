@@ -19,6 +19,7 @@ This library is aimed at helping to implement a Webhook server.
 -   Fix shit-code
 -   Continue working and thinking about the API
 -   Rewrite to general-purpose usage
+-   Type-safe custom properties
 
 # Usage
 
